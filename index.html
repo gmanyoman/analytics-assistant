@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AI Analytics Assistant</title>
+  <title>AI-Powered Analytics Assistant</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -19,9 +19,7 @@
       padding: 20px;
     }
 
-    h1 {
-      margin: 0 0 6px 0;
-    }
+    h1 { margin: 0 0 6px 0; }
 
     .sub {
       color: #666;
@@ -29,7 +27,7 @@
       font-size: 13px;
     }
 
-    /* 검색바 */
+    /* 검색 */
     .search-bar {
       display: flex;
       gap: 10px;
@@ -52,13 +50,12 @@
       cursor: pointer;
     }
 
-    /* GRID 핵심 */
+    /* 2x2 grid */
     .grid {
       display: grid;
-      grid-template-columns: 1fr 1.2fr;
-      grid-template-rows: auto auto;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
-      height: calc(100vh - 140px);
+      height: 70vh;
     }
 
     .card {
@@ -69,20 +66,23 @@
       overflow: hidden;
     }
 
-    /* KPI */
+    .title {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
     .kpi {
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
+      gap: 10px;
     }
 
     .kpi div {
       flex: 1;
-      text-align: center;
-      background: #fafafa;
-      margin: 4px;
-      padding: 10px;
+      background: #f8f8f8;
       border-radius: 10px;
+      padding: 10px;
+      text-align: center;
     }
 
     .kpi h3 {
@@ -92,7 +92,7 @@
     }
 
     .kpi p {
-      margin: 6px 0 0 0;
+      margin: 5px 0 0 0;
       font-size: 18px;
       font-weight: bold;
     }
@@ -121,13 +121,7 @@
 
     canvas {
       width: 100% !important;
-      height: 260px !important;
-    }
-
-    .title {
-      font-size: 13px;
-      font-weight: bold;
-      margin-bottom: 8px;
+      height: 220px !important;
     }
 
   </style>
@@ -138,13 +132,17 @@
 <div class="container">
 
 <h1>AI-Powered Analytics Assistant</h1>
-<div class="sub">질문 기반으로 사용자 행동을 분석하고 인사이트를 제공합니다</div>
-
-<div class="search-bar">
-  <input id="q" placeholder="예: 결제 실패가 왜 증가했을까?" />
-  <button onclick="run()">분석 실행</button>
+<div class="sub">
+질문 기반으로 분석 구조가 실시간으로 바뀌는 데이터 탐색 시스템
 </div>
 
+<!-- SEARCH -->
+<div class="search-bar">
+  <input id="q" placeholder="예: 4/23 이탈률 왜 감소했어?" />
+  <button onclick="run()">분석</button>
+</div>
+
+<!-- GRID -->
 <div class="grid">
 
   <!-- KPI -->
@@ -155,7 +153,7 @@
 
   <!-- CHART -->
   <div class="card">
-    <div class="title">📈 Funnel</div>
+    <div class="title">📈 분석 차트</div>
     <canvas id="chart"></canvas>
   </div>
 
@@ -179,72 +177,127 @@
 
 let chart;
 
-function run(){
+function run() {
 
-  const q = document.getElementById("q").value || "전환 분석";
+  const q = document.getElementById("q").value || "";
 
-  // KPI
-  document.getElementById("kpi").innerHTML = `
-    <div><h3>전환율</h3><p>${rand(50,90)}%</p></div>
-    <div><h3>실패율</h3><p>${rand(10,40)}%</p></div>
-    <div><h3>이탈율</h3><p>${rand(10,60)}%</p></div>
-  `;
+  // MODE 결정 (핵심)
+  let mode = "funnel";
 
-  // TABLE
-  document.getElementById("table").innerHTML =
-  q.includes("결제") ?
-  `
-    <table>
-      <tr><th>원인</th><th>비율</th></tr>
-      <tr><td>UX</td><td>${rand(20,50)}%</td></tr>
-      <tr><td>네트워크</td><td>${rand(10,30)}%</td></tr>
-      <tr><td>카드 실패</td><td>${rand(10,40)}%</td></tr>
-    </table>
-  `
-  :
-  `
-    <table>
-      <tr><th>단계</th><th>유저</th></tr>
-      <tr><td>Home</td><td>${rand(800,1200)}</td></tr>
-      <tr><td>Detail</td><td>${rand(400,800)}</td></tr>
-      <tr><td>Cart</td><td>${rand(200,500)}</td></tr>
-      <tr><td>Payment</td><td>${rand(100,300)}</td></tr>
-    </table>
-  `;
+  if (q.includes("결제")) mode = "payment";
+  else if (q.includes("채널")) mode = "channel";
+  else if (q.includes("이탈")) mode = "funnel";
+  else if (q.includes("4/23") || q.includes("감소") || q.includes("날짜")) mode = "date";
 
-  // AI
-  document.getElementById("ai").innerText = `
-원인 분석:
-- funnel 특정 구간 이탈 집중
-
-가설:
-- UX friction / 채널 품질 문제
-
-해결:
-- 결제 UX 개선
-- onboarding 개선
-
-액션:
-- A/B 테스트
-- 리타겟팅
-- drop 구간 개선
-  `;
-
-  draw();
-
+  render(mode, q);
 }
 
-function draw(){
+function render(mode, q) {
+
+  // ---------------- FUNNEL ----------------
+  if (mode === "funnel") {
+
+    document.getElementById("kpi").innerHTML = `
+      <div><h3>이탈률</h3><p>${rand(30,60)}%</p></div>
+      <div><h3>전환율</h3><p>${rand(40,70)}%</p></div>
+    `;
+
+    document.getElementById("table").innerHTML = `
+      <table>
+        <tr><th>단계</th><th>이탈</th></tr>
+        <tr><td>Home → Detail</td><td>${rand(20,40)}%</td></tr>
+        <tr><td>Cart → Pay</td><td>${rand(30,60)}%</td></tr>
+      </table>
+    `;
+
+    document.getElementById("ai").innerText =
+`📌 이탈 집중 구간: Cart → Payment
+🧪 가설: 결제 UX friction
+🚀 해결: 결제 단계 단순화`;
+
+  }
+
+  // ---------------- PAYMENT ----------------
+  if (mode === "payment") {
+
+    document.getElementById("kpi").innerHTML = `
+      <div><h3>실패율</h3><p>${rand(10,40)}%</p></div>
+      <div><h3>승인율</h3><p>${rand(60,90)}%</p></div>
+    `;
+
+    document.getElementById("table").innerHTML = `
+      <table>
+        <tr><th>원인</th><th>비율</th></tr>
+        <tr><td>카드 실패</td><td>${rand(20,50)}%</td></tr>
+        <tr><td>네트워크</td><td>${rand(10,30)}%</td></tr>
+      </table>
+    `;
+
+    document.getElementById("ai").innerText =
+`📌 결제 실패 증가
+→ 카드 인증 실패 비중 높음
+🚀 PG retry / UX 개선 필요`;
+  }
+
+  // ---------------- CHANNEL ----------------
+  if (mode === "channel") {
+
+    document.getElementById("kpi").innerHTML = `
+      <div><h3>전환율</h3><p>${rand(30,80)}%</p></div>
+      <div><h3>ROAS</h3><p>${rand(2,6)}x</p></div>
+    `;
+
+    document.getElementById("table").innerHTML = `
+      <table>
+        <tr><th>채널</th><th>전환율</th></tr>
+        <tr><td>검색</td><td>${rand(40,70)}%</td></tr>
+        <tr><td>광고</td><td>${rand(10,40)}%</td></tr>
+      </table>
+    `;
+
+    document.getElementById("ai").innerText =
+`📌 검색 채널 효율 최고
+🚀 광고 최적화 필요`;
+  }
+
+  // ---------------- DATE (핵심) ----------------
+  if (mode === "date") {
+
+    document.getElementById("kpi").innerHTML = `
+      <div><h3>이탈 변화</h3><p>-${rand(5,20)}%</p></div>
+      <div><h3>전환 변화</h3><p>+${rand(3,15)}%</p></div>
+    `;
+
+    document.getElementById("table").innerHTML = `
+      <table>
+        <tr><th>날짜</th><th>이탈률</th></tr>
+        <tr><td>4/22</td><td>${rand(40,60)}%</td></tr>
+        <tr><td>4/23</td><td>${rand(20,40)}%</td></tr>
+      </table>
+    `;
+
+    document.getElementById("ai").innerText =
+`📌 4/23 이탈률 감소 원인
+- UX 개선 배포 효과 가능성
+- 특정 채널 유입 증가
+
+🚀 추가 분석 필요: 배포 로그 / 채널 breakdown`;
+  }
+
+  draw();
+}
+
+function draw() {
 
   if(chart) chart.destroy();
 
   chart = new Chart(document.getElementById("chart"), {
-    type:"bar",
-    data:{
-      labels:["Home","Search","Detail","Cart","Pay"],
-      datasets:[{
-        label:"users",
-        data:[
+    type: "bar",
+    data: {
+      labels: ["Home","Search","Detail","Cart","Pay"],
+      datasets: [{
+        label: "users",
+        data: [
           rand(800,1200),
           rand(500,900),
           rand(300,700),
@@ -254,7 +307,6 @@ function draw(){
       }]
     }
   });
-
 }
 
 function rand(min,max){
