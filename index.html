@@ -8,11 +8,21 @@
     body {
       font-family: Arial;
       background: #f4f5f7;
-      padding: 30px;
-      color: #111;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
     }
 
-    h1 { margin-bottom: 6px; }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 6px;
+    }
 
     .sub {
       color: #666;
@@ -22,13 +32,13 @@
 
     .section {
       background: white;
-      padding: 20px;
+      padding: 18px;
       border-radius: 14px;
       margin-bottom: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    input, button {
+    input {
       width: 100%;
       padding: 12px;
       margin-top: 10px;
@@ -37,17 +47,28 @@
       font-size: 14px;
     }
 
-    button {
-      background: black;
-      color: white;
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      padding: 8px 12px;
+      background: #eee;
+      border-radius: 20px;
       cursor: pointer;
-      border: none;
+      font-size: 13px;
+    }
+
+    .chip:hover {
+      background: #ddd;
     }
 
     .cards {
       display: flex;
-      gap: 12px;
-      margin-top: 16px;
+      gap: 10px;
       flex-wrap: wrap;
     }
 
@@ -88,10 +109,32 @@
       border-radius: 12px;
     }
 
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th {
+      background: #fafafa;
+    }
+
   </style>
 </head>
 
 <body>
+
+<div class="container">
 
 <h1>AI-Powered Analytics Assistant</h1>
 
@@ -102,17 +145,19 @@
 
 <div class="section">
 
-  <h3>👤 누구를 분석하고 싶나요?</h3>
-  <input id="userInput" placeholder="예: 신규 사용자 / 광고 유입 / USER_1024">
-
   <h3>🔍 무엇이 궁금한가요?</h3>
-  <input id="question" placeholder="예: 결제 실패 후 왜 이탈했을까?">
+
+  <input id="question" placeholder="질문을 선택하거나 입력하세요">
+
+  <div class="chips">
+    <div class="chip" onclick="setQuestion(this)">전환율이 왜 떨어질까?</div>
+    <div class="chip" onclick="setQuestion(this)">어떤 채널이 효율적일까?</div>
+    <div class="chip" onclick="setQuestion(this)">결제 실패가 증가했을까?</div>
+    <div class="chip" onclick="setQuestion(this)">이 사용자는 왜 이탈했을까?</div>
+    <div class="chip" onclick="setQuestion(this)">광고 유입 사용자는 왜 전환이 낮을까?</div>
+  </div>
 
   <button onclick="runAnalysis()">AI 분석 실행</button>
-
-  <button onclick="regenerateLogs()" style="margin-top:8px; background:#444;">
-    🔄 새로운 데이터 생성
-  </button>
 
 </div>
 
@@ -120,12 +165,10 @@
 
 <canvas id="chart"></canvas>
 
-<div class="box" id="flowBox">
-  사용자 행동 흐름이 여기에 표시됩니다.
-</div>
+<div class="section" id="tableBox"></div>
 
-<div class="box" id="insightBox">
-  AI Insight가 여기에 표시됩니다.
+<div class="box" id="insightBox"></div>
+
 </div>
 
 <script>
@@ -133,15 +176,9 @@
 let logs = [];
 let chart;
 
-// ---------------------------
-// 1. 랜덤 로그 생성
-// ---------------------------
 function generateLogs() {
 
-  const users = Array.from(
-    { length: 80 },
-    (_, i) => "USER_" + (1000 + i)
-  );
+  const users = Array.from({ length: 80 }, (_, i) => "USER_" + (1000 + i));
 
   const events = [
     "home_view",
@@ -155,80 +192,87 @@ function generateLogs() {
     "exit"
   ];
 
-  const devices = ["iOS", "Android"];
-  const channels = ["ad", "organic"];
-
-  const logCount = randomInt(100, 300);
+  const logCount = randomInt(120, 300);
   const result = [];
 
   for (let i = 0; i < logCount; i++) {
-
-    const user = pick(users);
-
     result.push({
-      user_id: user,
+      user_id: pick(users),
       event_name: pick(events),
-      device: pick(devices),
-      channel: pick(channels),
+      device: Math.random() > 0.5 ? "iOS" : "Android",
+      channel: Math.random() > 0.5 ? "ad" : "organic",
       ts: "2026-05-08"
     });
-
   }
 
   return result;
 }
 
-// ---------------------------
-// 2. 분석 실행
-// ---------------------------
 function runAnalysis() {
 
-  const user = document.getElementById("userInput").value || "ALL";
-  const question = document.getElementById("question").value;
+  const q = document.getElementById("question").value || "전환 분석";
 
   const cards = document.getElementById("cards");
-  const flowBox = document.getElementById("flowBox");
   const insightBox = document.getElementById("insightBox");
+  const tableBox = document.getElementById("tableBox");
 
   // KPI
-  const success = randomInt(60, 95);
+  const conv = randomInt(40, 95);
   const fail = randomInt(5, 40);
-  const drop = randomInt(10, 50);
+  const drop = randomInt(10, 60);
 
   cards.innerHTML = `
-    <div class="card"><h3>전환율</h3><p>${success}%</p></div>
+    <div class="card"><h3>전환율</h3><p>${conv}%</p></div>
     <div class="card"><h3>실패율</h3><p>${fail}%</p></div>
     <div class="card"><h3>이탈률</h3><p>${drop}%</p></div>
   `;
 
-  // Flow
-  const sampleFlow = logs.slice(0, 8)
-    .map(l => l.event_name)
-    .join(" → ");
+  drawChart();
 
-  flowBox.innerHTML = `
-    <h3>👤 사용자 Flow (${user})</h3>
-    ${sampleFlow}
-  `;
+  // 질문별 다른 테이블
+  if (q.includes("채널")) {
+    tableBox.innerHTML = `
+      <h3>채널별 성과</h3>
+      <table>
+        <tr><th>채널</th><th>전환율</th></tr>
+        <tr><td>광고</td><td>${randomInt(10,40)}%</td></tr>
+        <tr><td>오가닉</td><td>${randomInt(30,70)}%</td></tr>
+      </table>
+    `;
+  }
 
-  // Insight
+  else if (q.includes("결제")) {
+    tableBox.innerHTML = `
+      <h3>결제 실패 분석</h3>
+      <table>
+        <tr><th>원인</th><th>비율</th></tr>
+        <tr><td>결제 UX</td><td>${randomInt(20,50)}%</td></tr>
+        <tr><td>네트워크</td><td>${randomInt(10,30)}%</td></tr>
+        <tr><td>카드 실패</td><td>${randomInt(10,40)}%</td></tr>
+      </table>
+    `;
+  }
+
+  else {
+    tableBox.innerHTML = `
+      <h3>퍼널 분석</h3>
+      <table>
+        <tr><th>단계</th><th>유저 수</th></tr>
+        <tr><td>Home</td><td>${randomInt(800,1200)}</td></tr>
+        <tr><td>Detail</td><td>${randomInt(400,800)}</td></tr>
+        <tr><td>Payment</td><td>${randomInt(100,400)}</td></tr>
+      </table>
+    `;
+  }
+
   insightBox.innerHTML = `
     <h3>🤖 AI Insight</h3>
-
-    ${question || "결제 실패 이후 행동 분석"}<br><br>
-
-    광고 유입 사용자의 전환율이 낮게 나타났습니다.<br>
-    특히 payment_fail 이후 재진입률 감소가 확인되었습니다.<br><br>
-
-    → 결제 UX 또는 유입 품질 점검 필요
+    ${q}<br><br>
+    현재 데이터에서는 특정 단계에서 이탈이 집중되고 있으며,<br>
+    유입 채널과 디바이스별 차이가 주요 요인으로 보입니다.
   `;
-
-  drawChart();
 }
 
-// ---------------------------
-// 3. 차트
-// ---------------------------
 function drawChart() {
 
   const ctx = document.getElementById("chart");
@@ -240,13 +284,13 @@ function drawChart() {
     data: {
       labels: ["Home", "Search", "Detail", "Cart", "Payment"],
       datasets: [{
-        label: "User Flow",
+        label: "Flow",
         data: [
-          randomInt(800, 1200),
-          randomInt(600, 900),
-          randomInt(400, 700),
-          randomInt(200, 500),
-          randomInt(100, 300)
+          randomInt(800,1200),
+          randomInt(500,900),
+          randomInt(300,700),
+          randomInt(200,500),
+          randomInt(100,300)
         ]
       }]
     }
@@ -254,28 +298,19 @@ function drawChart() {
 
 }
 
-// ---------------------------
-// 4. 새 데이터 생성
-// ---------------------------
-function regenerateLogs() {
-  logs = generateLogs();
+function setQuestion(el) {
+  document.getElementById("question").value = el.innerText;
   runAnalysis();
 }
 
-// ---------------------------
 // utils
-// ---------------------------
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
-// init
-window.onload = function () {
+// init (페이지 들어올 때마다 새 데이터 생성)
+window.onload = function() {
   logs = generateLogs();
+  runAnalysis();
 };
 
 </script>
