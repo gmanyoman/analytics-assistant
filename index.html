@@ -1,85 +1,179 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Role Dashboard</title>
+  <title>Analytics Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body {
       font-family: Arial;
-      padding: 40px;
-      background: #f5f5f5;
+      background: #f4f5f7;
+      padding: 30px;
     }
 
     h1 {
       margin-bottom: 20px;
     }
 
+    .topbar {
+      margin-bottom: 20px;
+    }
+
+    select, button {
+      padding: 10px;
+      margin-right: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    .cards {
+      display: flex;
+      gap: 16px;
+      margin-top: 20px;
+    }
+
     .card {
       background: white;
       padding: 20px;
       border-radius: 12px;
-      margin-top: 20px;
+      flex: 1;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    button {
-      padding: 10px 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+    .card h3 {
+      margin: 0;
+      color: #666;
+      font-size: 14px;
     }
 
-    select {
-      padding: 10px;
-      margin-right: 10px;
+    .card p {
+      font-size: 28px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .chart-box {
+      background: white;
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
   </style>
 </head>
 
 <body>
 
-<h1>Analytics Dashboard</h1>
+<h1>Role-Based Analytics Dashboard</h1>
 
-<select id="role">
-  <option value="marketing">Marketing</option>
-  <option value="settlement">Settlement</option>
-</select>
+<div class="topbar">
+  <select id="role">
+    <option value="marketing">Marketing</option>
+    <option value="settlement">Settlement</option>
+  </select>
 
-<button onclick="generate()">
-  Generate Data
-</button>
+  <button onclick="generate()">
+    Generate Data
+  </button>
+</div>
 
-<div id="output"></div>
+<div class="cards" id="cards"></div>
+
+<div class="chart-box">
+  <canvas id="myChart"></canvas>
+</div>
 
 <script>
+let chart;
+
+function random(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function generate() {
   const role = document.getElementById("role").value;
-  const output = document.getElementById("output");
+
+  const cards = document.getElementById("cards");
+
+  let labels = [];
+  let values = [];
 
   if (role === "marketing") {
-    output.innerHTML = `
-      <div class="card">
-        <h2>Marketing Funnel</h2>
 
-        <p>Page View: 1,000</p>
-        <p>Product View: 700</p>
-        <p>Add To Cart: 400</p>
-        <p>Purchase: 200</p>
+    const pageView = random(1000, 3000);
+    const productView = random(500, pageView);
+    const cart = random(200, productView);
+    const purchase = random(100, cart);
+
+    cards.innerHTML = `
+      <div class="card">
+        <h3>Total Visitors</h3>
+        <p>${pageView}</p>
+      </div>
+
+      <div class="card">
+        <h3>Conversion Rate</h3>
+        <p>${Math.floor((purchase/pageView)*100)}%</p>
+      </div>
+
+      <div class="card">
+        <h3>Purchases</h3>
+        <p>${purchase}</p>
       </div>
     `;
+
+    labels = ["Page View", "Product View", "Add To Cart", "Purchase"];
+    values = [pageView, productView, cart, purchase];
   }
 
   if (role === "settlement") {
-    output.innerHTML = `
-      <div class="card">
-        <h2>Payment Metrics</h2>
 
-        <p>Total Amount: ₩12,000,000</p>
-        <p>Success Rate: 92%</p>
-        <p>Failed Payments: 34</p>
+    const amount = random(1000000, 10000000);
+    const success = random(85, 99);
+    const failed = random(1, 50);
+
+    cards.innerHTML = `
+      <div class="card">
+        <h3>Total Amount</h3>
+        <p>₩${amount.toLocaleString()}</p>
+      </div>
+
+      <div class="card">
+        <h3>Success Rate</h3>
+        <p>${success}%</p>
+      </div>
+
+      <div class="card">
+        <h3>Failed Payments</h3>
+        <p>${failed}</p>
       </div>
     `;
+
+    labels = ["Card", "Transfer", "Mobile"];
+    values = [
+      random(40, 70),
+      random(10, 30),
+      random(5, 20)
+    ];
   }
+
+  if (chart) {
+    chart.destroy();
+  }
+
+  const ctx = document.getElementById("myChart");
+
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: role,
+        data: values
+      }]
+    }
+  });
 }
 </script>
 
