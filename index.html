@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AI-Powered Analytics Assistant</title>
+  <title>AI Analytics Assistant</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -15,23 +15,25 @@
 
     .container {
       width: 100%;
-      max-width: 1100px;
-      padding: 20px;
+      max-width: 1200px;
+      padding: 18px;
     }
 
-    h1 { margin: 0 0 6px 0; }
+    h1 {
+      margin: 0 0 4px 0;
+    }
 
     .sub {
       color: #666;
-      margin-bottom: 12px;
       font-size: 13px;
+      margin-bottom: 10px;
     }
 
-    /* 검색 */
+    /* search */
     .search-bar {
       display: flex;
       gap: 10px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     input {
@@ -50,15 +52,31 @@
       cursor: pointer;
     }
 
-    /* 2x2 grid */
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* 예시 버튼 (복구 + 가로형 자연 배치) */
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .chip {
+      padding: 6px 10px;
+      background: #eee;
+      border-radius: 18px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    /* 2-row layout */
+    .row {
+      display: flex;
       gap: 12px;
-      height: 70vh;
+      margin-bottom: 12px;
     }
 
     .card {
+      flex: 1;
       background: white;
       border-radius: 14px;
       padding: 12px;
@@ -72,16 +90,17 @@
       margin-bottom: 8px;
     }
 
+    /* KPI */
     .kpi {
       display: flex;
-      gap: 10px;
+      gap: 8px;
     }
 
     .kpi div {
       flex: 1;
       background: #f8f8f8;
-      border-radius: 10px;
       padding: 10px;
+      border-radius: 10px;
       text-align: center;
     }
 
@@ -92,7 +111,7 @@
     }
 
     .kpi p {
-      margin: 5px 0 0 0;
+      margin: 4px 0 0 0;
       font-size: 18px;
       font-weight: bold;
     }
@@ -106,12 +125,9 @@
     th, td {
       border-bottom: 1px solid #eee;
       padding: 6px;
-      text-align: left;
     }
 
-    th {
-      background: #fafafa;
-    }
+    th { background: #fafafa; }
 
     .ai {
       font-size: 12px;
@@ -120,7 +136,6 @@
     }
 
     canvas {
-      width: 100% !important;
       height: 220px !important;
     }
 
@@ -136,39 +151,44 @@
 질문 기반으로 분석 구조가 실시간으로 바뀌는 데이터 탐색 시스템
 </div>
 
-<!-- SEARCH -->
+<!-- INPUT -->
 <div class="search-bar">
   <input id="q" placeholder="예: 4/23 이탈률 왜 감소했어?" />
   <button onclick="run()">분석</button>
 </div>
 
-<!-- GRID -->
-<div class="grid">
+<!-- 예시 질문 버튼 (복구) -->
+<div class="chips">
+  <div class="chip" onclick="setQ(this)">전환율이 왜 떨어질까?</div>
+  <div class="chip" onclick="setQ(this)">결제 실패가 증가했을까?</div>
+  <div class="chip" onclick="setQ(this)">이 사용자는 왜 이탈했을까?</div>
+  <div class="chip" onclick="setQ(this)">어떤 채널이 효율적일까?</div>
+</div>
 
-  <!-- KPI -->
+<!-- KPI + AI -->
+<div class="row">
   <div class="card">
     <div class="title">📊 KPI</div>
     <div class="kpi" id="kpi"></div>
   </div>
 
-  <!-- CHART -->
-  <div class="card">
-    <div class="title">📈 분석 차트</div>
-    <canvas id="chart"></canvas>
-  </div>
-
-  <!-- TABLE -->
-  <div class="card">
-    <div class="title">📋 분석 결과</div>
-    <div id="table"></div>
-  </div>
-
-  <!-- AI -->
   <div class="card">
     <div class="title">🤖 AI Insight</div>
     <div class="ai" id="ai"></div>
   </div>
+</div>
 
+<!-- CHART + TABLE -->
+<div class="row">
+  <div class="card">
+    <div class="title">📈 Funnel</div>
+    <canvas id="chart"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="title">📋 분석 결과</div>
+    <div id="table"></div>
+  </div>
 </div>
 
 </div>
@@ -177,127 +197,60 @@
 
 let chart;
 
-function run() {
+function run(){
 
   const q = document.getElementById("q").value || "";
 
-  // MODE 결정 (핵심)
   let mode = "funnel";
 
   if (q.includes("결제")) mode = "payment";
   else if (q.includes("채널")) mode = "channel";
+  else if (q.includes("4/23") || q.includes("감소")) mode = "date";
   else if (q.includes("이탈")) mode = "funnel";
-  else if (q.includes("4/23") || q.includes("감소") || q.includes("날짜")) mode = "date";
 
-  render(mode, q);
+  render(mode);
 }
 
-function render(mode, q) {
+function render(mode){
 
-  // ---------------- FUNNEL ----------------
-  if (mode === "funnel") {
+  // KPI
+  document.getElementById("kpi").innerHTML = `
+    <div><h3>전환</h3><p>${rand(50,90)}%</p></div>
+    <div><h3>실패</h3><p>${rand(10,40)}%</p></div>
+    <div><h3>이탈</h3><p>${rand(10,60)}%</p></div>
+  `;
 
-    document.getElementById("kpi").innerHTML = `
-      <div><h3>이탈률</h3><p>${rand(30,60)}%</p></div>
-      <div><h3>전환율</h3><p>${rand(40,70)}%</p></div>
-    `;
+  // AI
+  document.getElementById("ai").innerText =
+`📌 원인 분석: funnel 구간 이탈 발생
+🧪 가설: UX / 채널 영향
+🚀 액션: A/B 테스트 / UX 개선`;
 
-    document.getElementById("table").innerHTML = `
-      <table>
-        <tr><th>단계</th><th>이탈</th></tr>
-        <tr><td>Home → Detail</td><td>${rand(20,40)}%</td></tr>
-        <tr><td>Cart → Pay</td><td>${rand(30,60)}%</td></tr>
-      </table>
-    `;
-
-    document.getElementById("ai").innerText =
-`📌 이탈 집중 구간: Cart → Payment
-🧪 가설: 결제 UX friction
-🚀 해결: 결제 단계 단순화`;
-
-  }
-
-  // ---------------- PAYMENT ----------------
-  if (mode === "payment") {
-
-    document.getElementById("kpi").innerHTML = `
-      <div><h3>실패율</h3><p>${rand(10,40)}%</p></div>
-      <div><h3>승인율</h3><p>${rand(60,90)}%</p></div>
-    `;
-
-    document.getElementById("table").innerHTML = `
-      <table>
-        <tr><th>원인</th><th>비율</th></tr>
-        <tr><td>카드 실패</td><td>${rand(20,50)}%</td></tr>
-        <tr><td>네트워크</td><td>${rand(10,30)}%</td></tr>
-      </table>
-    `;
-
-    document.getElementById("ai").innerText =
-`📌 결제 실패 증가
-→ 카드 인증 실패 비중 높음
-🚀 PG retry / UX 개선 필요`;
-  }
-
-  // ---------------- CHANNEL ----------------
-  if (mode === "channel") {
-
-    document.getElementById("kpi").innerHTML = `
-      <div><h3>전환율</h3><p>${rand(30,80)}%</p></div>
-      <div><h3>ROAS</h3><p>${rand(2,6)}x</p></div>
-    `;
-
-    document.getElementById("table").innerHTML = `
-      <table>
-        <tr><th>채널</th><th>전환율</th></tr>
-        <tr><td>검색</td><td>${rand(40,70)}%</td></tr>
-        <tr><td>광고</td><td>${rand(10,40)}%</td></tr>
-      </table>
-    `;
-
-    document.getElementById("ai").innerText =
-`📌 검색 채널 효율 최고
-🚀 광고 최적화 필요`;
-  }
-
-  // ---------------- DATE (핵심) ----------------
-  if (mode === "date") {
-
-    document.getElementById("kpi").innerHTML = `
-      <div><h3>이탈 변화</h3><p>-${rand(5,20)}%</p></div>
-      <div><h3>전환 변화</h3><p>+${rand(3,15)}%</p></div>
-    `;
-
-    document.getElementById("table").innerHTML = `
-      <table>
-        <tr><th>날짜</th><th>이탈률</th></tr>
-        <tr><td>4/22</td><td>${rand(40,60)}%</td></tr>
-        <tr><td>4/23</td><td>${rand(20,40)}%</td></tr>
-      </table>
-    `;
-
-    document.getElementById("ai").innerText =
-`📌 4/23 이탈률 감소 원인
-- UX 개선 배포 효과 가능성
-- 특정 채널 유입 증가
-
-🚀 추가 분석 필요: 배포 로그 / 채널 breakdown`;
-  }
+  // TABLE
+  document.getElementById("table").innerHTML = `
+    <table>
+      <tr><th>단계</th><th>유저</th></tr>
+      <tr><td>Home</td><td>${rand(800,1200)}</td></tr>
+      <tr><td>Detail</td><td>${rand(400,800)}</td></tr>
+      <tr><td>Cart</td><td>${rand(200,500)}</td></tr>
+      <tr><td>Pay</td><td>${rand(100,300)}</td></tr>
+    </table>
+  `;
 
   draw();
 }
 
-function draw() {
+function draw(){
 
   if(chart) chart.destroy();
 
   chart = new Chart(document.getElementById("chart"), {
-    type: "bar",
-    data: {
-      labels: ["Home","Search","Detail","Cart","Pay"],
-      datasets: [{
-        label: "users",
-        data: [
+    type:"bar",
+    data:{
+      labels:["Home","Search","Detail","Cart","Pay"],
+      datasets:[{
+        label:"users",
+        data:[
           rand(800,1200),
           rand(500,900),
           rand(300,700),
@@ -307,10 +260,16 @@ function draw() {
       }]
     }
   });
+
 }
 
 function rand(min,max){
   return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function setQ(el){
+  document.getElementById("q").value = el.innerText;
+  run();
 }
 
 window.onload = run;
