@@ -1,70 +1,66 @@
-
+<!DOCTYPE html>
 <html>
 <head>
-  <title>AI Analytics Dashboard</title>
+  <title>PathFinder AI</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
+
     body {
       font-family: Arial;
       background: #f4f5f7;
       padding: 30px;
+      color: #111;
     }
 
     h1 {
-      margin-bottom: 24px;
+      margin-bottom: 10px;
+    }
+
+    .sub {
+      color: #666;
+      margin-bottom: 30px;
     }
 
     .section {
       background: white;
-      padding: 20px;
-      border-radius: 16px;
+      padding: 24px;
+      border-radius: 18px;
       margin-bottom: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    select, input, button {
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #ddd;
-      margin-top: 10px;
+    input, button {
       width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid #ddd;
       box-sizing: border-box;
+      margin-top: 10px;
+      font-size: 15px;
     }
 
-    .question-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-      flex-wrap: wrap;
-    }
-
-    .question-buttons button {
-      width: auto;
+    button {
       cursor: pointer;
       border: none;
-    }
-
-    .generate-btn {
-      margin-top: 20px;
       background: black;
       color: white;
-      cursor: pointer;
-      border: none;
     }
 
     .cards {
       display: flex;
       gap: 16px;
       margin-top: 20px;
+      flex-wrap: wrap;
     }
 
     .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
       flex: 1;
+      min-width: 220px;
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
@@ -75,61 +71,78 @@
     }
 
     .card p {
-      font-size: 28px;
-      font-weight: bold;
+      font-size: 30px;
       margin-top: 10px;
-    }
-
-    .chart-box {
-      background: white;
-      padding: 20px;
-      border-radius: 16px;
-      margin-top: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      font-weight: bold;
     }
 
     .ai-box {
       background: #111;
       color: white;
+      padding: 24px;
+      border-radius: 18px;
+      line-height: 1.8;
+      margin-top: 20px;
+    }
+
+    .flow-box {
+      background: white;
+      padding: 24px;
+      border-radius: 18px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      line-height: 2;
+    }
+
+    .chart-box {
+      background: white;
+      padding: 24px;
+      border-radius: 18px;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .next-actions {
+      margin-top: 20px;
+    }
+
+    .action-btn {
+      background: #fff;
+      color: #111;
+      border: 1px solid #ddd;
+      margin-top: 10px;
+    }
+
+    .analysis-result {
+      background: #eef3ff;
       padding: 20px;
       border-radius: 16px;
       margin-top: 20px;
-      line-height: 1.7;
+      line-height: 1.8;
     }
+
   </style>
 </head>
 
 <body>
 
-<h1>AI 기반 데이터 탐색 대시보드</h1>
+<h1>PathFinder AI</h1>
+
+<div class="sub">
+  AI 기반 사용자 행동 탐색 플랫폼
+</div>
 
 <div class="section">
 
-  <h3>👤 나는 누구인가요?</h3>
-
-  <select id="role">
-    <option value="marketing">마케팅 담당자</option>
-    <option value="product">프로덕트 매니저</option>
-    <option value="settlement">정산 담당자</option>
-  </select>
-
-  <h3 style="margin-top:20px;">🔍 무엇이 궁금한가요?</h3>
-
-  <div class="question-buttons">
-    <button onclick="setQuestion('전환율이 왜 떨어질까?')">전환율이 왜 떨어질까?</button>
-
-    <button onclick="setQuestion('어떤 채널이 효율적일까?')">어떤 채널이 효율적일까?</button>
-
-    <button onclick="setQuestion('결제 실패가 증가했을까?')">결제 실패가 증가했을까?</button>
-  </div>
+  <h3>🔍 무엇이 궁금한가요?</h3>
 
   <input
     id="question"
-    placeholder="예: 광고 유입 사용자의 구매 전환이 왜 낮을까?"
+    placeholder="예: 왜 결제 실패 후 돌아오지 않았을까?"
   />
 
-  <button class="generate-btn" onclick="generateDashboard()">
-    AI 추천 대시보드 생성
+  <button onclick="analyze()">
+    AI 분석 시작
   </button>
 
 </div>
@@ -140,8 +153,50 @@
   <canvas id="myChart"></canvas>
 </div>
 
-<div class="ai-box" id="aiExplanation">
-  AI가 분석 방향을 추천해드립니다.
+<div class="flow-box" id="flowBox">
+  사용자 행동 흐름이 여기에 표시됩니다.
+</div>
+
+<div class="ai-box" id="aiInsight">
+  AI Insight가 여기에 표시됩니다.
+</div>
+
+<div class="section">
+
+  <h3>🚀 추천 다음 액션</h3>
+
+  <div class="next-actions">
+
+    <button
+      class="action-btn"
+      onclick="nextAnalysis('card')"
+    >
+      카드사별 실패율 비교
+    </button>
+
+    <button
+      class="action-btn"
+      onclick="nextAnalysis('device')"
+    >
+      iOS / Android 결제 성공률 비교
+    </button>
+
+    <button
+      class="action-btn"
+      onclick="nextAnalysis('funnel')"
+    >
+      신규 사용자 결제 퍼널 분석
+    </button>
+
+  </div>
+
+  <div
+    class="analysis-result"
+    id="analysisResult"
+  >
+    추가 분석 결과가 여기에 표시됩니다.
+  </div>
+
 </div>
 
 <script>
@@ -152,11 +207,7 @@ function random(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function setQuestion(text) {
-  document.getElementById("question").value = text;
-}
-
-function generateDashboard() {
+function analyze() {
 
   const question = document
     .getElementById("question")
@@ -165,201 +216,171 @@ function generateDashboard() {
   const cards = document
     .getElementById("cards");
 
-  const aiBox = document
-    .getElementById("aiExplanation");
+  const flowBox = document
+    .getElementById("flowBox");
+
+  const aiInsight = document
+    .getElementById("aiInsight");
 
   let labels = [];
   let values = [];
 
-  let explanation = "";
+  // KPI Cards
 
-  let cardHTML = "";
+  const successRate = random(85, 98);
+  const failCount = random(10, 120);
+  const dropRate = random(5, 40);
 
-  // 전환 분석
-  if (question.includes("전환")) {
+  cards.innerHTML = `
 
-    const visit = random(1000, 3000);
-    const cart = random(500, 1500);
-    const purchase = random(100, 800);
+    <div class="card">
+      <h3>결제 성공률</h3>
+      <p>${successRate}%</p>
+    </div>
 
-    cardHTML = `
-      <div class="card">
-        <h3>방문 사용자</h3>
-        <p>${visit}</p>
-      </div>
+    <div class="card">
+      <h3>실패 건수</h3>
+      <p>${failCount}</p>
+    </div>
 
-      <div class="card">
-        <h3>구매 전환율</h3>
-        <p>${Math.floor((purchase/visit)*100)}%</p>
-      </div>
+    <div class="card">
+      <h3>이탈률</h3>
+      <p>${dropRate}%</p>
+    </div>
 
-      <div class="card">
-        <h3>장바구니 이탈</h3>
-        <p>${cart - purchase}</p>
-      </div>
-    `;
+  `;
 
-    labels = [
-      "방문",
-      "상품 조회",
-      "장바구니",
-      "구매"
-    ];
+  // User Flow
 
-    values = [
-      visit,
-      random(700, visit),
-      cart,
-      purchase
-    ];
+  flowBox.innerHTML = `
 
-    explanation = `
-      전환율 저하는 일반적으로
-      퍼널 이탈 증가 또는 유입 품질 변화와
-      연관되는 경우가 많습니다.<br><br>
+    <h3>👤 USER_1024 행동 흐름</h3>
 
-      특히 광고 유입 사용자의
-      장바구니 이탈률과 디바이스별 전환 차이를
-      함께 분석하는 것을 추천합니다.
-    `;
-  }
+    09:10 홈 진입<br>
+    09:12 상품 조회<br>
+    09:15 장바구니 담기<br>
+    09:16 결제 시도<br>
+    09:16 카드 인증 실패<br>
+    09:17 앱 종료
 
-  // 채널 분석
-  else if (
-    question.includes("채널") ||
-    question.includes("유입")
-  ) {
+  `;
 
-    cardHTML = `
-      <div class="card">
-        <h3>광고 유입 비율</h3>
-        <p>${random(20,60)}%</p>
-      </div>
+  // AI Insight
 
-      <div class="card">
-        <h3>최고 전환 채널</h3>
-        <p>SEO</p>
-      </div>
+  aiInsight.innerHTML = `
 
-      <div class="card">
-        <h3>ROAS</h3>
-        <p>${random(120,400)}%</p>
-      </div>
-    `;
+    <h3>🤖 AI Insight</h3>
 
-    labels = [
-      "SEO",
-      "광고",
-      "푸시",
-      "직접유입"
-    ];
+    결제 실패 이후 재진입이 발생하지 않았습니다.<br><br>
 
-    values = [
-      random(100,300),
-      random(100,300),
-      random(100,300),
-      random(100,300)
-    ];
+    특히 iOS 신규 사용자 그룹에서
+    동일 시간대 카드 인증 실패율 증가가 확인되었습니다.<br><br>
 
-    explanation = `
-      채널 효율 분석은
-      유입량 자체보다 실제 구매 전환과
-      리텐션을 함께 보는 것이 중요합니다.<br><br>
+    광고 유입 사용자의 결제 완료율은
+    전일 대비 18% 감소했습니다.<br><br>
 
-      광고 채널은 유입량은 높지만
-      전환율이 낮을 가능성이 있어
-      퍼널 비교 분석을 추천합니다.
-    `;
-  }
+    결제 인증 단계 UX 또는
+    특정 카드사 오류 여부를 확인하는 것을 추천합니다.
 
-  // 결제 분석
-  else if (
-    question.includes("결제") ||
-    question.includes("실패")
-  ) {
+  `;
 
-    cardHTML = `
-      <div class="card">
-        <h3>결제 성공률</h3>
-        <p>${random(85,99)}%</p>
-      </div>
+  labels = [
+    "홈",
+    "상품조회",
+    "장바구니",
+    "결제시도",
+    "구매완료"
+  ];
 
-      <div class="card">
-        <h3>실패 건수</h3>
-        <p>${random(10,100)}</p>
-      </div>
-
-      <div class="card">
-        <h3>환불 비율</h3>
-        <p>${random(1,8)}%</p>
-      </div>
-    `;
-
-    labels = [
-      "카드",
-      "계좌이체",
-      "간편결제"
-    ];
-
-    values = [
-      random(50,100),
-      random(20,80),
-      random(20,80)
-    ];
-
-    explanation = `
-      결제 실패 증가는
-      특정 결제수단 오류 또는 트래픽 급증과
-      연관될 수 있습니다.<br><br>
-
-      시간대별 실패율과
-      결제수단별 성공률을 함께 비교하는 것을
-      추천합니다.
-    `;
-  }
-
-  else {
-
-    cardHTML = `
-      <div class="card">
-        <h3>추천 상태</h3>
-        <p>준비중</p>
-      </div>
-    `;
-
-    labels = ["데이터"];
-    values = [100];
-
-    explanation = `
-      질문 내용을 기반으로
-      추천 분석을 준비하고 있습니다.
-    `;
-  }
-
-  cards.innerHTML = cardHTML;
-
-  aiBox.innerHTML = explanation;
+  values = [
+    1200,
+    980,
+    620,
+    400,
+    280
+  ];
 
   if (chart) {
     chart.destroy();
   }
 
-  const ctx = document.getElementById("myChart");
+  const ctx = document
+    .getElementById("myChart");
 
   chart = new Chart(ctx, {
+
     type: "bar",
+
     data: {
+
       labels: labels,
+
       datasets: [{
-        label: "추천 분석 결과",
+
+        label: "퍼널 흐름",
+
         data: values
+
       }]
     }
+
   });
+
+}
+
+function nextAnalysis(type) {
+
+  const result = document
+    .getElementById("analysisResult");
+
+  if (type === "card") {
+
+    result.innerHTML = `
+
+      <h3>💳 카드사별 실패율 비교</h3>
+
+      A카드 실패율이 평균 대비
+      2.3배 높게 나타났습니다.<br><br>
+
+      특정 카드 인증 응답 지연이
+      결제 이탈 증가와 연관될 가능성이 있습니다.
+
+    `;
+  }
+
+  if (type === "device") {
+
+    result.innerHTML = `
+
+      <h3>📱 디바이스별 결제 성공률</h3>
+
+      iOS 사용자의 결제 성공률이
+      Android 대비 14% 낮게 나타났습니다.<br><br>
+
+      특히 특정 OS 버전에서
+      인증 완료 이탈이 증가했습니다.
+
+    `;
+  }
+
+  if (type === "funnel") {
+
+    result.innerHTML = `
+
+      <h3>🛒 신규 사용자 결제 퍼널 분석</h3>
+
+      신규 사용자의 장바구니 진입률은 높았지만,
+      결제 완료 단계에서 급격한 이탈이 발생했습니다.<br><br>
+
+      첫 결제 UX 또는 할인 조건 노출 여부를
+      추가 확인하는 것을 추천합니다.
+
+    `;
+  }
+
 }
 
 </script>
 
 </body>
 </html>
-```
