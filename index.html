@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PathFinder AI</title>
-
+  <title>AI-Powered Analytics Assistant</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-
     body {
       font-family: Arial;
       background: #f4f5f7;
@@ -14,111 +12,80 @@
       color: #111;
     }
 
-    h1 {
-      margin-bottom: 10px;
-    }
+    h1 { margin-bottom: 6px; }
 
     .sub {
       color: #666;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
+      line-height: 1.5;
     }
 
     .section {
       background: white;
-      padding: 24px;
-      border-radius: 18px;
-      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
     input, button {
       width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid #ddd;
-      box-sizing: border-box;
+      padding: 12px;
       margin-top: 10px;
-      font-size: 15px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      font-size: 14px;
     }
 
     button {
-      cursor: pointer;
-      border: none;
       background: black;
       color: white;
+      cursor: pointer;
+      border: none;
     }
 
     .cards {
       display: flex;
-      gap: 16px;
-      margin-top: 20px;
+      gap: 12px;
+      margin-top: 16px;
       flex-wrap: wrap;
     }
 
     .card {
       flex: 1;
-      min-width: 220px;
-      background: white;
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      min-width: 180px;
+      background: #fff;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.08);
     }
 
     .card h3 {
-      margin: 0;
+      font-size: 13px;
       color: #666;
-      font-size: 14px;
+      margin: 0;
     }
 
     .card p {
-      font-size: 30px;
-      margin-top: 10px;
+      font-size: 22px;
       font-weight: bold;
+      margin-top: 8px;
     }
 
-    .ai-box {
+    .box {
       background: #111;
       color: white;
-      padding: 24px;
-      border-radius: 18px;
-      line-height: 1.8;
-      margin-top: 20px;
+      padding: 18px;
+      border-radius: 14px;
+      margin-top: 16px;
+      line-height: 1.6;
     }
 
-    .flow-box {
+    canvas {
+      margin-top: 16px;
       background: white;
-      padding: 24px;
-      border-radius: 18px;
-      margin-top: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      line-height: 2;
-    }
-
-    .chart-box {
-      background: white;
-      padding: 24px;
-      border-radius: 18px;
-      margin-top: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .next-actions {
-      margin-top: 20px;
-    }
-
-    .action-btn {
-      background: #fff;
-      color: #111;
-      border: 1px solid #ddd;
-      margin-top: 10px;
-    }
-
-    .analysis-result {
-      background: #eef3ff;
-      padding: 20px;
-      border-radius: 16px;
-      margin-top: 20px;
-      line-height: 1.8;
+      padding: 10px;
+      border-radius: 12px;
     }
 
   </style>
@@ -126,259 +93,190 @@
 
 <body>
 
-<h1>PathFinder AI</h1>
+<h1>AI-Powered Analytics Assistant</h1>
 
 <div class="sub">
-  AI 기반 사용자 행동 탐색 플랫폼
+질문 기반으로 사용자 행동을 탐색하고<br>
+분석 방향과 인사이트를 추천합니다.
 </div>
 
 <div class="section">
 
+  <h3>👤 누구를 분석하고 싶나요?</h3>
+  <input id="userInput" placeholder="예: 신규 사용자 / 광고 유입 / USER_1024">
+
   <h3>🔍 무엇이 궁금한가요?</h3>
+  <input id="question" placeholder="예: 결제 실패 후 왜 이탈했을까?">
 
-  <input
-    id="question"
-    placeholder="예: 왜 결제 실패 후 돌아오지 않았을까?"
-  />
+  <button onclick="runAnalysis()">AI 분석 실행</button>
 
-  <button onclick="analyze()">
-    AI 분석 시작
+  <button onclick="regenerateLogs()" style="margin-top:8px; background:#444;">
+    🔄 새로운 데이터 생성
   </button>
 
 </div>
 
 <div class="cards" id="cards"></div>
 
-<div class="chart-box">
-  <canvas id="myChart"></canvas>
-</div>
+<canvas id="chart"></canvas>
 
-<div class="flow-box" id="flowBox">
+<div class="box" id="flowBox">
   사용자 행동 흐름이 여기에 표시됩니다.
 </div>
 
-<div class="ai-box" id="aiInsight">
+<div class="box" id="insightBox">
   AI Insight가 여기에 표시됩니다.
-</div>
-
-<div class="section">
-
-  <h3>🚀 추천 다음 액션</h3>
-
-  <div class="next-actions">
-
-    <button
-      class="action-btn"
-      onclick="nextAnalysis('card')"
-    >
-      카드사별 실패율 비교
-    </button>
-
-    <button
-      class="action-btn"
-      onclick="nextAnalysis('device')"
-    >
-      iOS / Android 결제 성공률 비교
-    </button>
-
-    <button
-      class="action-btn"
-      onclick="nextAnalysis('funnel')"
-    >
-      신규 사용자 결제 퍼널 분석
-    </button>
-
-  </div>
-
-  <div
-    class="analysis-result"
-    id="analysisResult"
-  >
-    추가 분석 결과가 여기에 표시됩니다.
-  </div>
-
 </div>
 
 <script>
 
+let logs = [];
 let chart;
 
-function random(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+// ---------------------------
+// 1. 랜덤 로그 생성
+// ---------------------------
+function generateLogs() {
 
-function analyze() {
+  const users = Array.from(
+    { length: 80 },
+    (_, i) => "USER_" + (1000 + i)
+  );
 
-  const question = document
-    .getElementById("question")
-    .value;
-
-  const cards = document
-    .getElementById("cards");
-
-  const flowBox = document
-    .getElementById("flowBox");
-
-  const aiInsight = document
-    .getElementById("aiInsight");
-
-  let labels = [];
-  let values = [];
-
-  // KPI Cards
-
-  const successRate = random(85, 98);
-  const failCount = random(10, 120);
-  const dropRate = random(5, 40);
-
-  cards.innerHTML = `
-
-    <div class="card">
-      <h3>결제 성공률</h3>
-      <p>${successRate}%</p>
-    </div>
-
-    <div class="card">
-      <h3>실패 건수</h3>
-      <p>${failCount}</p>
-    </div>
-
-    <div class="card">
-      <h3>이탈률</h3>
-      <p>${dropRate}%</p>
-    </div>
-
-  `;
-
-  // User Flow
-
-  flowBox.innerHTML = `
-
-    <h3>👤 USER_1024 행동 흐름</h3>
-
-    09:10 홈 진입<br>
-    09:12 상품 조회<br>
-    09:15 장바구니 담기<br>
-    09:16 결제 시도<br>
-    09:16 카드 인증 실패<br>
-    09:17 앱 종료
-
-  `;
-
-  // AI Insight
-
-  aiInsight.innerHTML = `
-
-    <h3>🤖 AI Insight</h3>
-
-    결제 실패 이후 재진입이 발생하지 않았습니다.<br><br>
-
-    특히 iOS 신규 사용자 그룹에서
-    동일 시간대 카드 인증 실패율 증가가 확인되었습니다.<br><br>
-
-    광고 유입 사용자의 결제 완료율은
-    전일 대비 18% 감소했습니다.<br><br>
-
-    결제 인증 단계 UX 또는
-    특정 카드사 오류 여부를 확인하는 것을 추천합니다.
-
-  `;
-
-  labels = [
-    "홈",
-    "상품조회",
-    "장바구니",
-    "결제시도",
-    "구매완료"
+  const events = [
+    "home_view",
+    "search",
+    "product_view",
+    "add_to_cart",
+    "payment_attempt",
+    "payment_fail",
+    "purchase_complete",
+    "banner_click",
+    "exit"
   ];
 
-  values = [
-    1200,
-    980,
-    620,
-    400,
-    280
-  ];
+  const devices = ["iOS", "Android"];
+  const channels = ["ad", "organic"];
 
-  if (chart) {
-    chart.destroy();
+  const logCount = randomInt(100, 300);
+  const result = [];
+
+  for (let i = 0; i < logCount; i++) {
+
+    const user = pick(users);
+
+    result.push({
+      user_id: user,
+      event_name: pick(events),
+      device: pick(devices),
+      channel: pick(channels),
+      ts: "2026-05-08"
+    });
+
   }
 
-  const ctx = document
-    .getElementById("myChart");
+  return result;
+}
+
+// ---------------------------
+// 2. 분석 실행
+// ---------------------------
+function runAnalysis() {
+
+  const user = document.getElementById("userInput").value || "ALL";
+  const question = document.getElementById("question").value;
+
+  const cards = document.getElementById("cards");
+  const flowBox = document.getElementById("flowBox");
+  const insightBox = document.getElementById("insightBox");
+
+  // KPI
+  const success = randomInt(60, 95);
+  const fail = randomInt(5, 40);
+  const drop = randomInt(10, 50);
+
+  cards.innerHTML = `
+    <div class="card"><h3>전환율</h3><p>${success}%</p></div>
+    <div class="card"><h3>실패율</h3><p>${fail}%</p></div>
+    <div class="card"><h3>이탈률</h3><p>${drop}%</p></div>
+  `;
+
+  // Flow
+  const sampleFlow = logs.slice(0, 8)
+    .map(l => l.event_name)
+    .join(" → ");
+
+  flowBox.innerHTML = `
+    <h3>👤 사용자 Flow (${user})</h3>
+    ${sampleFlow}
+  `;
+
+  // Insight
+  insightBox.innerHTML = `
+    <h3>🤖 AI Insight</h3>
+
+    ${question || "결제 실패 이후 행동 분석"}<br><br>
+
+    광고 유입 사용자의 전환율이 낮게 나타났습니다.<br>
+    특히 payment_fail 이후 재진입률 감소가 확인되었습니다.<br><br>
+
+    → 결제 UX 또는 유입 품질 점검 필요
+  `;
+
+  drawChart();
+}
+
+// ---------------------------
+// 3. 차트
+// ---------------------------
+function drawChart() {
+
+  const ctx = document.getElementById("chart");
+
+  if (chart) chart.destroy();
 
   chart = new Chart(ctx, {
-
     type: "bar",
-
     data: {
-
-      labels: labels,
-
+      labels: ["Home", "Search", "Detail", "Cart", "Payment"],
       datasets: [{
-
-        label: "퍼널 흐름",
-
-        data: values
-
+        label: "User Flow",
+        data: [
+          randomInt(800, 1200),
+          randomInt(600, 900),
+          randomInt(400, 700),
+          randomInt(200, 500),
+          randomInt(100, 300)
+        ]
       }]
     }
-
   });
 
 }
 
-function nextAnalysis(type) {
-
-  const result = document
-    .getElementById("analysisResult");
-
-  if (type === "card") {
-
-    result.innerHTML = `
-
-      <h3>💳 카드사별 실패율 비교</h3>
-
-      A카드 실패율이 평균 대비
-      2.3배 높게 나타났습니다.<br><br>
-
-      특정 카드 인증 응답 지연이
-      결제 이탈 증가와 연관될 가능성이 있습니다.
-
-    `;
-  }
-
-  if (type === "device") {
-
-    result.innerHTML = `
-
-      <h3>📱 디바이스별 결제 성공률</h3>
-
-      iOS 사용자의 결제 성공률이
-      Android 대비 14% 낮게 나타났습니다.<br><br>
-
-      특히 특정 OS 버전에서
-      인증 완료 이탈이 증가했습니다.
-
-    `;
-  }
-
-  if (type === "funnel") {
-
-    result.innerHTML = `
-
-      <h3>🛒 신규 사용자 결제 퍼널 분석</h3>
-
-      신규 사용자의 장바구니 진입률은 높았지만,
-      결제 완료 단계에서 급격한 이탈이 발생했습니다.<br><br>
-
-      첫 결제 UX 또는 할인 조건 노출 여부를
-      추가 확인하는 것을 추천합니다.
-
-    `;
-  }
-
+// ---------------------------
+// 4. 새 데이터 생성
+// ---------------------------
+function regenerateLogs() {
+  logs = generateLogs();
+  runAnalysis();
 }
+
+// ---------------------------
+// utils
+// ---------------------------
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+// init
+window.onload = function () {
+  logs = generateLogs();
+};
 
 </script>
 
