@@ -9,32 +9,29 @@
       font-family: Arial;
       background: #f4f5f7;
       margin: 0;
-      padding: 0;
       display: flex;
       justify-content: center;
     }
 
     .container {
       width: 100%;
-      max-width: 900px;
-      padding: 30px;
+      max-width: 860px;
+      padding: 24px;
     }
 
-    h1 {
-      margin-bottom: 6px;
-    }
+    h1 { margin-bottom: 6px; }
 
     .sub {
       color: #666;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       line-height: 1.5;
     }
 
     .section {
       background: white;
-      padding: 18px;
+      padding: 16px;
       border-radius: 14px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
@@ -44,7 +41,6 @@
       margin-top: 10px;
       border-radius: 10px;
       border: 1px solid #ddd;
-      font-size: 14px;
     }
 
     .chips {
@@ -62,10 +58,6 @@
       font-size: 13px;
     }
 
-    .chip:hover {
-      background: #ddd;
-    }
-
     .cards {
       display: flex;
       gap: 10px;
@@ -74,59 +66,43 @@
 
     .card {
       flex: 1;
-      min-width: 180px;
+      min-width: 160px;
       background: #fff;
-      padding: 16px;
+      padding: 14px;
       border-radius: 12px;
       box-shadow: 0 1px 5px rgba(0,0,0,0.08);
     }
 
-    .card h3 {
-      font-size: 13px;
-      color: #666;
-      margin: 0;
-    }
-
-    .card p {
-      font-size: 22px;
-      font-weight: bold;
-      margin-top: 8px;
-    }
-
-    .box {
-      background: #111;
-      color: white;
-      padding: 18px;
-      border-radius: 14px;
-      margin-top: 16px;
-      line-height: 1.6;
-    }
-
-    canvas {
-      margin-top: 16px;
-      background: white;
-      padding: 10px;
-      border-radius: 12px;
-    }
+    .card h3 { font-size: 12px; color: #666; margin: 0; }
+    .card p { font-size: 20px; font-weight: bold; margin-top: 6px; }
 
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
+      font-size: 13px;
     }
 
     th, td {
       padding: 10px;
       border-bottom: 1px solid #eee;
       text-align: left;
-      font-size: 13px;
     }
 
-    th {
-      background: #fafafa;
+    th { background: #fafafa; }
+
+    .box {
+      background: #111;
+      color: white;
+      padding: 16px;
+      border-radius: 14px;
+      margin-top: 14px;
+      line-height: 1.6;
+      white-space: pre-line;
+    }
+
+    .highlight {
+      background: #ffe8e8;
     }
 
   </style>
@@ -147,17 +123,14 @@
 
   <h3>🔍 무엇이 궁금한가요?</h3>
 
-  <input id="question" placeholder="질문을 선택하거나 입력하세요">
+  <input id="question">
 
   <div class="chips">
-    <div class="chip" onclick="setQuestion(this)">전환율이 왜 떨어질까?</div>
-    <div class="chip" onclick="setQuestion(this)">어떤 채널이 효율적일까?</div>
-    <div class="chip" onclick="setQuestion(this)">결제 실패가 증가했을까?</div>
-    <div class="chip" onclick="setQuestion(this)">이 사용자는 왜 이탈했을까?</div>
-    <div class="chip" onclick="setQuestion(this)">광고 유입 사용자는 왜 전환이 낮을까?</div>
+    <div class="chip" onclick="setQ(this)">전환율이 왜 떨어질까?</div>
+    <div class="chip" onclick="setQ(this)">결제 실패가 증가했을까?</div>
+    <div class="chip" onclick="setQ(this)">이 사용자는 왜 이탈했을까?</div>
+    <div class="chip" onclick="setQ(this)">광고 유입 전환이 낮은 이유</div>
   </div>
-
-  <button onclick="runAnalysis()">AI 분석 실행</button>
 
 </div>
 
@@ -167,7 +140,7 @@
 
 <div class="section" id="tableBox"></div>
 
-<div class="box" id="insightBox"></div>
+<div class="section" id="aiBox"></div>
 
 </div>
 
@@ -178,139 +151,151 @@ let chart;
 
 function generateLogs() {
 
-  const users = Array.from({ length: 80 }, (_, i) => "USER_" + (1000 + i));
+  const users = Array.from({length:80},(_,i)=>"USER_"+(1000+i));
 
   const events = [
-    "home_view",
-    "search",
-    "product_view",
-    "add_to_cart",
-    "payment_attempt",
-    "payment_fail",
-    "purchase_complete",
-    "banner_click",
-    "exit"
+    "home_view","search","product_view",
+    "add_to_cart","payment_attempt",
+    "payment_fail","purchase_complete"
   ];
 
-  const logCount = randomInt(120, 300);
+  const logCount = random(150,300);
   const result = [];
 
-  for (let i = 0; i < logCount; i++) {
+  for(let i=0;i<logCount;i++){
     result.push({
       user_id: pick(users),
-      event_name: pick(events),
-      device: Math.random() > 0.5 ? "iOS" : "Android",
-      channel: Math.random() > 0.5 ? "ad" : "organic",
-      ts: "2026-05-08"
+      event: pick(events),
+      device: Math.random()>0.5?"iOS":"Android",
+      channel: Math.random()>0.5?"ad":"organic"
     });
   }
 
   return result;
 }
 
-function runAnalysis() {
+// ---------------- 분석 ----------------
+function run(){
 
   const q = document.getElementById("question").value || "전환 분석";
 
-  const cards = document.getElementById("cards");
-  const insightBox = document.getElementById("insightBox");
-  const tableBox = document.getElementById("tableBox");
+  const failIndex = random(20,60);
 
-  // KPI
-  const conv = randomInt(40, 95);
-  const fail = randomInt(5, 40);
-  const drop = randomInt(10, 60);
-
-  cards.innerHTML = `
-    <div class="card"><h3>전환율</h3><p>${conv}%</p></div>
-    <div class="card"><h3>실패율</h3><p>${fail}%</p></div>
-    <div class="card"><h3>이탈률</h3><p>${drop}%</p></div>
+  document.getElementById("cards").innerHTML = `
+    <div class="card"><h3>전환율</h3><p>${random(50,90)}%</p></div>
+    <div class="card"><h3>실패율</h3><p>${random(10,40)}%</p></div>
+    <div class="card"><h3>이탈율</h3><p>${random(10,60)}%</p></div>
   `;
 
-  drawChart();
+  draw();
 
-  // 질문별 다른 테이블
-  if (q.includes("채널")) {
-    tableBox.innerHTML = `
-      <h3>채널별 성과</h3>
-      <table>
-        <tr><th>채널</th><th>전환율</th></tr>
-        <tr><td>광고</td><td>${randomInt(10,40)}%</td></tr>
-        <tr><td>오가닉</td><td>${randomInt(30,70)}%</td></tr>
-      </table>
-    `;
-  }
-
-  else if (q.includes("결제")) {
-    tableBox.innerHTML = `
-      <h3>결제 실패 분석</h3>
-      <table>
-        <tr><th>원인</th><th>비율</th></tr>
-        <tr><td>결제 UX</td><td>${randomInt(20,50)}%</td></tr>
-        <tr><td>네트워크</td><td>${randomInt(10,30)}%</td></tr>
-        <tr><td>카드 실패</td><td>${randomInt(10,40)}%</td></tr>
-      </table>
-    `;
-  }
-
-  else {
-    tableBox.innerHTML = `
-      <h3>퍼널 분석</h3>
-      <table>
-        <tr><th>단계</th><th>유저 수</th></tr>
-        <tr><td>Home</td><td>${randomInt(800,1200)}</td></tr>
-        <tr><td>Detail</td><td>${randomInt(400,800)}</td></tr>
-        <tr><td>Payment</td><td>${randomInt(100,400)}</td></tr>
-      </table>
-    `;
-  }
-
-  insightBox.innerHTML = `
-    <h3>🤖 AI Insight</h3>
-    ${q}<br><br>
-    현재 데이터에서는 특정 단계에서 이탈이 집중되고 있으며,<br>
-    유입 채널과 디바이스별 차이가 주요 요인으로 보입니다.
+  // ---------------- 퍼널 테이블 ----------------
+  let table = `
+    <h3>📊 사용자 퍼널</h3>
+    <table>
+      <tr><th>단계</th><th>유저</th></tr>
+      <tr><td>Home</td><td>${random(800,1200)}</td></tr>
+      <tr><td>Detail</td><td>${random(400,800)}</td></tr>
+      <tr class="${q.includes('결제')?'highlight':''}">
+        <td>Payment</td><td>${random(100,400)}</td>
+      </tr>
+    </table>
   `;
+
+  document.getElementById("tableBox").innerHTML = table;
+
+  // ---------------- AI Insight ----------------
+  document.getElementById("aiBox").innerHTML = `
+🤖 AI Insight
+
+📌 원인 분석
+- 광고 유입 사용자 전환 낮음
+- 결제 단계 UX friction 존재
+
+🧪 가설
+- iOS 결제 실패율 증가
+- 신규 유저 신뢰 부족
+
+🚀 해결책
+- 결제 UX 단순화
+- 실패 사용자 리타겟팅
+
+💡 액션
+- 결제 버튼 A/B 테스트
+- funnel drop 구간 개선
+- 신규 onboarding 개선
+
+🔍 이탈 자동 분류
+- UX 문제 (40%)
+- 가격 문제 (25%)
+- 신뢰 부족 (35%)
+`;
+
+  // ---------------- 질문 추천 ----------------
+  const suggested = `
+💬 추천 질문
+
+- 왜 결제 실패가 발생했을까?
+- 어떤 채널이 전환이 높은가?
+- 이탈은 어느 단계에서 발생했는가?
+- 신규 유저는 어디서 떨어지는가?
+`;
+
+  document.getElementById("aiBox").innerHTML += suggested;
 }
 
-function drawChart() {
+// ---------------- 차트 ----------------
+function draw(){
 
-  const ctx = document.getElementById("chart");
+  const ctx=document.getElementById("chart");
 
-  if (chart) chart.destroy();
+  if(chart) chart.destroy();
 
-  chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Home", "Search", "Detail", "Cart", "Payment"],
-      datasets: [{
-        label: "Flow",
-        data: [
-          randomInt(800,1200),
-          randomInt(500,900),
-          randomInt(300,700),
-          randomInt(200,500),
-          randomInt(100,300)
+  chart=new Chart(ctx,{
+    type:"bar",
+    data:{
+      labels:["Home","Search","Detail","Cart","Payment"],
+      datasets:[{
+        label:"User Flow",
+        data:[
+          random(800,1200),
+          random(500,900),
+          random(300,700),
+          random(200,500),
+          random(100,300)
         ]
       }]
     }
   });
-
 }
 
-function setQuestion(el) {
+// ---------------- interaction: user drop click ----------------
+document.addEventListener("click", (e)=>{
+
+  if(e.target.tagName==="TD" && e.target.innerText.includes("Payment")){
+    alert("👉 이 구간에서 이탈 분석: 결제 UX / 실패율 상승 가능성");
+  }
+
+});
+
+// ---------------- utils ----------------
+function setQ(el){
   document.getElementById("question").value = el.innerText;
-  runAnalysis();
+  run();
 }
 
-// utils
-function randomInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
-function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function random(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
 
-// init (페이지 들어올 때마다 새 데이터 생성)
-window.onload = function() {
-  logs = generateLogs();
-  runAnalysis();
+function pick(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+// init
+window.onload=function(){
+  logs=generateLogs();
+  run();
 };
 
 </script>
