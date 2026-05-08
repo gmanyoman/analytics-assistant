@@ -1,21 +1,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AI Analytics Assistant</title>
+  <title>AI-Powered Analytics Assistant</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body {
       font-family: Arial;
       background: #f4f5f7;
+      margin: 0;
       display: flex;
       justify-content: center;
-      margin: 0;
     }
 
     .container {
-      max-width: 900px;
       width: 100%;
+      max-width: 860px;
       padding: 24px;
     }
 
@@ -35,29 +35,34 @@
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    input {
-      width: 100%;
-      padding: 12px;
+    /* 🔍 검색바 (핵심 변경) */
+    .search-bar {
+      display: flex;
+      gap: 10px;
       margin-top: 10px;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 12px;
       border-radius: 10px;
       border: 1px solid #ddd;
+      margin-top: 0;
+    }
+
+    .search-bar button {
+      width: 160px;
+      border: none;
+      border-radius: 10px;
+      background: black;
+      color: white;
+      cursor: pointer;
     }
 
     .hint {
       font-size: 12px;
       color: #888;
       margin-top: 6px;
-    }
-
-    button {
-      margin-top: 10px;
-      padding: 12px;
-      width: 100%;
-      border: none;
-      border-radius: 10px;
-      background: black;
-      color: white;
-      cursor: pointer;
     }
 
     .chips {
@@ -143,17 +148,20 @@
 분석 방향과 인사이트를 추천합니다.
 </div>
 
-<!-- INPUT -->
+<!-- 질문 영역 -->
 <div class="section">
 
   <h3>🔍 무엇이 궁금한가요?</h3>
 
-  <input id="question"
-    placeholder="예: 결제 실패가 왜 증가했을까? / 어떤 채널이 효율적인가?"
-  />
+  <div class="search-bar">
+    <input id="question"
+      placeholder="예: 결제 실패가 왜 증가했을까? / 어떤 채널이 효율적인가?"
+    />
+    <button onclick="run()">AI 분석 실행</button>
+  </div>
 
   <div class="hint">
-    💡 질문을 입력하거나 아래 추천 질문을 선택하세요
+    💡 질문을 입력하거나 추천 질문을 클릭하세요
   </div>
 
   <div class="chips">
@@ -163,15 +171,13 @@
     <div class="chip" onclick="setQ(this)">어떤 채널이 효율적일까?</div>
   </div>
 
-  <button onclick="run()">AI 분석 실행</button>
-
 </div>
 
 <!-- KPI -->
 <div class="section">
-  <h3>📊 핵심 지표 설명</h3>
+  <h3>📊 핵심 지표</h3>
   <div class="hint">
-    아래 지표는 선택한 질문 기반으로 동적으로 계산됩니다
+    질문에 따라 KPI는 자동으로 재구성됩니다
   </div>
 
   <div class="cards" id="cards"></div>
@@ -181,7 +187,7 @@
 <div class="section">
   <h3>📈 사용자 행동 퍼널</h3>
   <div class="hint">
-    Home → Search → Detail → Cart → Payment 흐름에서 유저 감소 구간을 보여줍니다
+    Home → Search → Detail → Cart → Payment 흐름
   </div>
   <canvas id="chart"></canvas>
 </div>
@@ -189,13 +195,10 @@
 <!-- TABLE -->
 <div class="section">
   <h3 id="tableTitle">📋 분석 결과</h3>
-  <div class="hint">
-    선택한 질문에 따라 다른 분석 테이블이 생성됩니다
-  </div>
   <div id="tableBox"></div>
 </div>
 
-<!-- AI -->
+<!-- AI INSIGHT -->
 <div class="section">
   <h3>🤖 AI Insight</h3>
   <div id="aiBox" class="box"></div>
@@ -211,7 +214,7 @@ function run() {
 
   const q = document.getElementById("question").value || "전환 분석";
 
-  // KPI (이제 의미 설명 포함)
+  // KPI
   document.getElementById("cards").innerHTML = `
     <div class="card">
       <h3>전환율 (Purchase / Visit)</h3>
@@ -219,12 +222,12 @@ function run() {
     </div>
 
     <div class="card">
-      <h3>실패율 (Payment Fail)</h3>
+      <h3>결제 실패율</h3>
       <p>${rand(10,40)}%</p>
     </div>
 
     <div class="card">
-      <h3>이탈율 (Drop-off)</h3>
+      <h3>이탈율</h3>
       <p>${rand(10,60)}%</p>
     </div>
   `;
@@ -232,8 +235,7 @@ function run() {
   drawChart();
 
   // TABLE
-  let tableTitle = "📋 퍼널 분석 결과";
-
+  let title = "📋 퍼널 분석 결과";
   let table = `
     <table>
       <tr><th>단계</th><th>유저 수</th></tr>
@@ -245,7 +247,7 @@ function run() {
   `;
 
   if (q.includes("결제")) {
-    tableTitle = "📋 결제 실패 분석";
+    title = "📋 결제 실패 분석";
     table = `
       <table>
         <tr><th>원인</th><th>비율</th></tr>
@@ -256,31 +258,31 @@ function run() {
     `;
   }
 
-  document.getElementById("tableTitle").innerText = tableTitle;
+  document.getElementById("tableTitle").innerText = title;
   document.getElementById("tableBox").innerHTML = table;
 
   // AI INSIGHT (구조 강화)
   document.getElementById("aiBox").innerText = `
 📌 원인 분석
 - 특정 단계에서 이탈 집중 발생
-- 유입 채널별 전환율 차이 존재
+- 채널별 전환율 차이 존재
 
 🧪 가설
 - 신규 유저는 결제 단계에서 신뢰 부족
 - iOS 환경 UX friction 존재
 
 🚀 해결책
-- 결제 UX 단계 축소
+- 결제 UX 단순화
 - onboarding 개선
 
 💡 시도해볼 액션
-- A/B 테스트 (결제 버튼)
-- 실패 사용자 리타겟팅
+- A/B 테스트 (결제 버튼 위치)
 - funnel drop 구간 개선
+- 리타겟팅 캠페인
 
 🔍 이탈 원인 분류
 - UX 문제 (40%)
-- 가격 민감도 (30%)
+- 가격 문제 (30%)
 - 신뢰 부족 (30%)
 `;
 
@@ -310,8 +312,8 @@ function draw() {
 
 }
 
-// chip click
-function setQ(el) {
+// chip
+function setQ(el){
   document.getElementById("question").value = el.innerText;
   run();
 }
